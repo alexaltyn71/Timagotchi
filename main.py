@@ -7,7 +7,7 @@ import time
 kill_pillow = False
 FOOD = 100
 WATER = 100
-SLEEP = 1
+SLEEP = 100
 LOVE = 100
 COINS = 0
 start_time = round(time.time(), 1)
@@ -50,8 +50,7 @@ def coins():
 
 
 def gameLoop():
-    global tima, tv, pillow, food, dis, COINS, running
-    pygame.display.set_mode(size, pygame.NOFRAME)
+    global tima, tv, pillow, food, dis, COINS, running, ex
 
     def our_snake(snake_list):
         for x in snake_list:
@@ -62,11 +61,12 @@ def gameLoop():
         dis.blit(mesg, [dis_width / 8, dis_height / 2])
 
     dis_width, dis_height = 720, 480
-    dis = pygame.display.set_mode((dis_width, dis_height))
+    dis = pygame.display.set_mode((dis_width, dis_height), pygame.NOFRAME)
 
     back = (194, 255, 147)
     text = (48, 104, 10)
     snake_block = 10
+    speed = 6
     coin = load_image('coin.png')
     tima_cur = load_image('cursor.png')
     font_style = pygame.font.SysFont("Comic Sans MS", 22)
@@ -149,11 +149,13 @@ def gameLoop():
             foodx = round(random.randrange(0, dis_width - snake_block) / 10.0) * 10.0
             foody = round(random.randrange(0, dis_height - snake_block) / 10.0) * 10.0
             COINS += 1
+            speed += 2
 
-        clock.tick(20)
+        clock.tick(speed)
 
 
 def game_exit():
+    global running
     pygame.init()
 
     screen.fill('black')
@@ -161,16 +163,23 @@ def game_exit():
     button = load_image('game_exit.png')
     screen.blit(exit_tima, (0, 0))
     screen.blit(button, (0, 0))
-    pygame.time.delay(60)
+    pygame.display.flip()
+
+    time.sleep(5)
+    running = False
 
 
 def over():
+    global running
     pygame.init()
 
     screen.fill('black')
     exit_tima = load_image('game_over.png')
     screen.blit(exit_tima, (0, 0))
-    pygame.time.delay(60)
+    pygame.display.flip()
+
+    time.sleep(5)
+    running = False
 
 
 class Home(pygame.sprite.Sprite):
@@ -442,7 +451,7 @@ class Shop(pygame.sprite.Sprite):
 all_sprites = pygame.sprite.Group()
 
 size = width, height = 720, 480
-screen = pygame.display.set_mode(size)
+screen = pygame.display.set_mode(size, pygame.NOFRAME)
 pygame.display.set_caption('Timagotchi')
 
 dis = Home()
@@ -452,7 +461,6 @@ pillow = SPillow()
 food = Food()
 ex = Exit()
 
-cur = False
 running = True
 while running:
     for event in pygame.event.get():
@@ -460,11 +468,9 @@ while running:
             running = False
         if event.type == pygame.MOUSEBUTTONDOWN:
             all_sprites.update(event)
-        if event.type == pygame.MOUSEMOTION and cur:
-            all_sprites.update(event)
 
     now = round(time.time() + 0.05, 1)
-    if (now - start_time) % 5 == 0:
+    if (now - start_time) % 20 == 0:
         SLEEP -= 1
     if (now - start_time) % 100 == 0:
         FOOD -= 1
